@@ -585,7 +585,7 @@ const EJS = {
   publicKey   : 'Y0OphnrmuhDp7Qzye',  // Public Key dari dashboard EmailJS
   serviceId   : 'service_70pvsrf',    // Service ID Gmail BPR
   templateId  : 'template_cnxp6iu',  // Template ID untuk email data form ke BPR
-  otpTemplate : 'template_90eqg8r'   // Template ID untuk OTP ke nasabah — ganti setelah buat template OTP
+  otpTemplate : 'template_otp_bpr'   // Template ID untuk OTP ke nasabah — ganti setelah buat template OTP
 };
 const BPR_EMAIL = 'bgraciamandiri@gmail.com';
 const BPR_NAME  = 'BPR Gracia Mandiri';
@@ -886,8 +886,8 @@ async function submit(){
   document.getElementById('aud-email').textContent=fd.email;
   document.getElementById('aud-ts').textContent=ts.toLocaleString('id-ID');
 
-  // Kirim email ke BPR
-  showLoading('Mengirim ke BPR Gracia Mandiri...');
+  // Upload PDF dan kirim email ke BPR
+  showLoading('Mengunggah PDF & mengirim ke BPR...');
   await sendEmailToBPR();
 
   hideLoading();
@@ -898,12 +898,30 @@ async function submit(){
 async function sendEmailToBPR(){
   const statusEl=document.getElementById('email-status');
 
+  // Upload PDF ke file.io untuk dapat link download
+  let pdfLink = '(Link PDF tidak tersedia — nasabah sudah mengunduh salinannya)';
+  try {
+    if(pdfBlob){
+      const formData = new FormData();
+      formData.append('file', pdfBlob, 'FormDeposito_BPRGracia_'+ref+'.pdf');
+      const uploadRes = await fetch('https://file.io/?expires=7d', {method:'POST', body:formData});
+      const uploadJson = await uploadRes.json();
+      if(uploadJson.success && uploadJson.link){
+        pdfLink = uploadJson.link + ' (link aktif 7 hari, sekali unduh)';
+      }
+    }
+  } catch(e){ console.warn('Upload PDF gagal:', e); }
+  const statusEl=document.getElementById('email-status');
+
   // Susun isi email lengkap
   const tglLahirFmt = fd.tgl_lahir ? new Date(fd.tgl_lahir).toLocaleDateString('id-ID',{dateStyle:'long'}) : '—';
   const isiForm = `
 FORMULIR DEPOSITO BERJANGKA — BPR GRACIA MANDIRI
 Nomor Referensi : ${ref}
 Tanggal         : ${ts.toLocaleString('id-ID',{dateStyle:'full',timeStyle:'medium'})}
+
+═══ DOWNLOAD PDF FORMULIR ═══
+${pdfLink}
 
 ═══ A. DATA PRODUK ═══
 Jenis Deposito  : Deposito Berjangka
