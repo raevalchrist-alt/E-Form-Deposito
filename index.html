@@ -911,7 +911,6 @@ async function sendEmailToBPR(){
       }
     }
   } catch(e){ console.warn('Upload PDF gagal:', e); }
-  const statusEl=document.getElementById('email-status');
 
   // Susun isi email lengkap
   const tglLahirFmt = fd.tgl_lahir ? new Date(fd.tgl_lahir).toLocaleDateString('id-ID',{dateStyle:'long'}) : '—';
