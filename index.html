@@ -325,13 +325,7 @@ html,body{font-family:'DM Sans',sans-serif;background:#BFCED6;color:var(--text);
       <div class="fr fr1" style="margin-bottom:13px"><div class="field"><label>Alamat Domisili (jika berbeda dengan KTP)</label><textarea id="domisili" placeholder="Kosongkan jika sama dengan KTP"></textarea></div></div>
       <div class="fr">
         <div class="field"><label>No. Telepon / HP <span class="req">*</span></label><input type="tel" id="hp" placeholder="08xxxxxxxxxx" inputmode="tel"></div>
-        <div class="field">
-  <label>Email Nasabah <span class="req">*</span></label>
-  <input type="email" id="email" placeholder="nama@email.com" inputmode="email" oninput="chkEmail(this)">
-  <div class="hint" id="email-hint" style="color:#F20819;font-weight:500">
-    ⚠️ Pastikan email benar — Kode OTP akan dikirim ke alamat ini
-  </div>
-</div>
+        <div class="field"><label>Email Nasabah <span class="req">*</span></label><input type="email" id="email" placeholder="nama@email.com" inputmode="email"><div class="hint" style="color:#F20819;font-weight:500">⚠️ Pastikan email benar — kode OTP akan dikirim ke alamat ini</div></div>
       </div>
     </div>
   </div>
@@ -583,9 +577,9 @@ html,body{font-family:'DM Sans',sans-serif;background:#BFCED6;color:var(--text);
 //  Ganti 3 nilai di bawah ini setelah daftar
 // ════════════════════════════════════════════
 const EJS = {
-  publicKey   : 'Y0OphnrmuhDp7Qzye',  // Public Key dari dashboard EmailJS
-  serviceId   : 'service_70pvsrf',    // Service ID Gmail BPR
-  templateId  : 'template_cnxp6iu',  // Template ID untuk email data form ke BPR
+  publicKey  : 'Y0OphnrmuhDp7Qzye',
+  serviceId  : 'service_70pvsrf',
+  templateId : 'template_cnxp6iu'
 };
 const BPR_EMAIL = 'bgraciamandiri@gmail.com';
 const BPR_NAME  = 'BPR Gracia Mandiri';
@@ -801,22 +795,6 @@ function updateUI(){
 }
 
 // ════ OTP ════
-function chkEmail(el){
-  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value);
-  const hint = document.getElementById('email-hint');
-  if(el.value.length > 3){
-    if(valid){
-      hint.style.color='#1A7A4A';
-      hint.textContent='✅ Email valid — OTP akan dikirim ke alamat ini';
-    } else {
-      hint.style.color='#F20819';
-      hint.textContent='❌ Format email tidak valid (contoh: nama@gmail.com)';
-    }
-  } else {
-    hint.style.color='#F20819';
-    hint.textContent='⚠️ Pastikan email benar — Kode OTP akan dikirim ke alamat ini';
-  }
-}
 function sendOTP(){
   collect();
   otp = String(Math.floor(100000+Math.random()*900000));
@@ -830,15 +808,17 @@ function sendOTP(){
   emailjs.send(EJS.serviceId, EJS.templateId, {
     to_email     : fd.email,
     to_name      : fd.nama||'Nasabah',
-    subject      : 'Kode OTP Verifikasi E-Form Deposito — BPR Gracia Mandiri',
-    ref_number   : '—', tanggal: new Date().toLocaleString('id-ID'),
-    nama_nasabah : fd.nama||'—', nik:'—', nominal:'—', jangka:'—',
-    instruksi    : '—', bayar_bunga:'—', hp:'—',
-    email_nas    : fd.email||'—', profil_risiko:'—',
-    isi_form     : '╔══════════════════╗\n   KODE OTP: '+otp+'   \n╚══════════════════╝\n\nKode berlaku 60 detik.\nJangan berikan kepada siapapun.\n\n— BPR Gracia Mandiri'
+    subject      : '[OTP] Kode Verifikasi E-Form Deposito BPR Gracia Mandiri',
+    ref_number   : '-', tanggal: new Date().toLocaleString('id-ID'),
+    nama_nasabah : fd.nama||'-', nik:'-', nominal:'-', jangka:'-',
+    instruksi    : '-', bayar_bunga:'-', hp: fd.hp||'-',
+    email_nas    : fd.email||'-', profil_risiko:'-',
+    isi_form     : 'Kode OTP Anda: ' + otp + '\n\nKode berlaku 60 detik. Jangan berikan kepada siapapun.\n\nBPR Gracia Mandiri'
+  }).then(()=>{
+    console.log('OTP terkirim ke', fd.email);
   }).catch(err=>{
-    console.warn('OTP send failed:', err);
-    alert('⚠️ Email OTP gagal terkirim ke '+fd.email+'\n\nKode OTP Anda: '+otp+'\n\nGunakan kode ini untuk melanjutkan.');
+    console.warn('OTP gagal:', err);
+    alert('⚠️ OTP gagal dikirim ke email.\nKode OTP Anda: ' + otp + '\n\nGunakan kode ini untuk melanjutkan.');
   });
 
   setTimeout(()=>document.querySelector('.oi').focus(), 400);
@@ -853,13 +833,13 @@ function resendOTP(){
   emailjs.send(EJS.serviceId, EJS.templateId, {
     to_email     : fd.email,
     to_name      : fd.nama||'Nasabah',
-    subject      : '[Kirim Ulang] Kode OTP — BPR Gracia Mandiri',
-    ref_number   : '—', tanggal: new Date().toLocaleString('id-ID'),
-    nama_nasabah : fd.nama||'—', nik:'—', nominal:'—', jangka:'—',
-    instruksi    : '—', bayar_bunga:'—', hp:'—',
-    email_nas    : fd.email||'—', profil_risiko:'—',
-    isi_form     : '╔══════════════════╗\n   KODE OTP: '+otp+'   \n╚══════════════════╝\n\nKode berlaku 60 detik.\nJangan berikan kepada siapapun.\n\n— BPR Gracia Mandiri'
-  }).catch(()=>alert('⚠️ Gagal kirim ulang. Kode OTP: '+otp));
+    subject      : '[OTP Ulang] Kode Verifikasi E-Form Deposito BPR Gracia Mandiri',
+    ref_number   : '-', tanggal: new Date().toLocaleString('id-ID'),
+    nama_nasabah : fd.nama||'-', nik:'-', nominal:'-', jangka:'-',
+    instruksi    : '-', bayar_bunga:'-', hp: fd.hp||'-',
+    email_nas    : fd.email||'-', profil_risiko:'-',
+    isi_form     : 'Kode OTP Anda: ' + otp + '\n\nKode berlaku 60 detik. Jangan berikan kepada siapapun.\n\nBPR Gracia Mandiri'
+  }).catch(()=>alert('⚠️ Gagal kirim ulang. Kode: ' + otp));
 }
 function oi(el,i){
   el.value=el.value.replace(/\D/g,'').slice(-1);
@@ -920,17 +900,16 @@ async function submit(){
 async function sendEmailToBPR(){
   const statusEl=document.getElementById('email-status');
 
-  // Upload PDF ke file.io untuk dapat link download
-  let pdfLink = '(Link PDF tidak tersedia — nasabah sudah mengunduh salinannya)';
+  // Upload PDF ke tmpfiles.org
+  let pdfLink = '(PDF sudah diunduh nasabah — link upload gagal)';
   try {
     if(pdfBlob){
-      const formData = new FormData();
-      formData.append('file', new File([pdfBlob], 'FormDeposito_BPRGracia_'+ref+'.pdf', {type:'application/pdf'}));
-      const uploadRes = await fetch('https://tmpfiles.org/api/v1/upload', {method:'POST', body:formData});
-      const uploadJson = await uploadRes.json();
-      if(uploadJson.status==='success' && uploadJson.data && uploadJson.data.url){
-        const directUrl = uploadJson.data.url.replace('tmpfiles.org/','tmpfiles.org/dl/');
-        pdfLink = directUrl + ' (aktif 60 menit)';
+      const fd2 = new FormData();
+      fd2.append('file', new File([pdfBlob], 'FormDeposito_BPRGracia_'+ref+'.pdf', {type:'application/pdf'}));
+      const upRes = await fetch('https://tmpfiles.org/api/v1/upload', {method:'POST', body:fd2});
+      const upJson = await upRes.json();
+      if(upJson.status==='success' && upJson.data && upJson.data.url){
+        pdfLink = upJson.data.url.replace('tmpfiles.org/','tmpfiles.org/dl/') + ' (aktif 60 menit)';
       }
     }
   } catch(e){ console.warn('Upload PDF gagal:', e); }
